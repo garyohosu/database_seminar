@@ -1,0 +1,1406 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>新入社員向けデータベース講座</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/white.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/monokai.css">
+    
+    <style>
+        :root {
+            /* Template-like light theme palette */
+            --primary-color: #3498db;   /* template blue */
+            --accent-color: #3498db;
+            --surface-color: #ffffff;   /* light surface */
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f1c40f;
+            --info-color: #3498db;
+        }
+        /* Global softer background to reduce glare */
+        body { background: #eef2f6; }
+        .reveal { background: #eef2f6; }
+        
+        .reveal {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 28px;
+        }
+        
+        .reveal .slides {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .reveal .slides section {
+            text-align: left;
+            padding: 12px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        
+        .reveal h1 {
+            font-size: 1.6em;
+            text-align: center;
+            color: #222;
+            margin: 0 0 15px 0;
+        }
+        
+        .reveal h2 {
+            font-size: 1.2em;
+            color: var(--accent-color);
+            text-shadow: none;
+            margin: 0 0 12px 0;
+        }
+        
+        .reveal h3 {
+            font-size: 1.0em;
+            color: var(--accent-color);
+            margin: 0 0 8px 0;
+        }
+        
+        .reveal h4 {
+            font-size: 0.9em;
+            color: var(--info-color);
+            margin: 0 0 6px 0;
+        }
+        
+        .reveal p, .reveal li {
+            font-size: 0.7em;
+            line-height: 1.3;
+            margin: 3px 0;
+            color: #333;
+        }
+        
+        /* コンパクトなテーブル */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.5em;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .data-table th {
+            background: #ecf6fc;
+            color: #1f4f72;
+            padding: 6px 4px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .data-table td {
+            padding: 4px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+            text-align: center;
+            font-size: 1em;
+            color: #333;
+        }
+        
+        .duplicate-data {
+            background: rgba(231, 76, 60, 0.4) !important;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .improved-data {
+            background: rgba(39, 174, 96, 0.4) !important;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        /* コンパクトなカード */
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 6px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #eee;
+        }
+        
+        .card h3 {
+            color: var(--accent-color);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8em;
+        }
+        
+        .card-icon {
+            font-size: 1.0em;
+            margin-right: 8px;
+            padding: 4px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            color: #2c3e50;
+        }
+        
+        /* コンパクトなSQL */
+        .sql-demo {
+            background: #f7f7f7;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+            border-left: 3px solid var(--accent-color);
+            font-family: 'Consolas', 'Monaco', monospace;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            font-size: 0.6em;
+        }
+        
+        .sql-demo code {
+            color: #ecf0f1;
+            line-height: 1.3;
+        }
+        
+        .sql-keyword { color: #3498db; font-weight: bold; }
+        .sql-string { color: #27ae60; }
+        .sql-comment { color: #95a5a6; font-style: italic; }
+        
+        /* コンパクトなボタン */
+        .interactive-btn {
+            background: linear-gradient(45deg, #003a7a, var(--primary-color));
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 0.6em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            margin: 3px 2px;
+        }
+        
+        .interactive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        
+        /* コンパクトなステップ */
+        .step-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 10px 0;
+            gap: 8px;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 10px;
+            margin: 0 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--accent-color);
+            color: #2c3e50;
+            border-radius: 50%;
+            line-height: 30px;
+            font-weight: bold;
+            font-size: 0.7em;
+            margin-bottom: 6px;
+        }
+        
+        /* グリッドレイアウトの調整 */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        /* 特殊効果 */
+        .glow-text { text-shadow: none; }
+        
+        .emoji {
+            font-size: 1.0em;
+            margin-right: 6px;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        /* タイトルスライド */
+        .title-slide {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 2.0em;
+            margin-bottom: 15px;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.0em;
+            color: #bdc3c7;
+            margin-bottom: 25px;
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 1024px) {
+            .reveal {
+                font-size: 24px;
+            }
+            
+            .step-container {
+                flex-direction: column;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .data-table {
+                font-size: 0.4em;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .reveal {
+                font-size: 20px;
+            }
+            
+            .reveal .slides section {
+                padding: 8px;
+            }
+            
+            .title-slide h1 {
+                font-size: 1.6em;
+            }
+            
+            .card {
+                padding: 8px;
+                margin: 4px 0;
+            }
+        }
+        
+        /* アニメーション（軽量化） */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        /* 特別なスタイル */
+        .section-header {
+            background: #ecf6fc;
+            color: #1f4f72;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px 0;
+            }
+        
+        .highlight-box {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 10px;
+            background: #ecf6fc;
+            margin: 10px 0;
+        }
+        
+        .warning-box {
+            background: #fff2f2;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+        
+        .success-box {
+            background: #f2fff5;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        /* Template-specific utility classes */
+        .agenda-item {
+            padding: 6px;
+            margin: 4px 0;
+            border-left: 5px solid #3498db;
+            background: #f7f7f7;
+        }
+        .hands-on {
+            border: 2px dashed #27ae60;
+            background: #f2fff5;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            border: 2px solid #e74c3c;
+            background: #fff2f2;
+            padding: 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- スライド1: タイトルスライド -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <h1 class="glow-text">🚀 新入社員向け<br>データベース講座</h1>
+                <p class="subtitle">～ ACCESS で学ぶデータベースの基礎 ～<br>理論からハンズオンまで、2時間で身につく実践知識</p>
+                <div class="emoji">📊 💡 🎯</div>
+                <p style="font-size: 0.7em; color: #ecf0f1;">2025年 | 120分講座</p>
+                <p style="font-size: 0.6em; color: #ecf0f1;">press <strong>SPACE</strong> to begin</p>
+            </section>
+
+            <!-- スライド2: アジェンダ -->
+            <section data-background-color="#eef2f6">
+                <h2><span class="emoji">🗺️</span>本日の学習内容（120分）</h2>
+                
+                <div class="step-container">
+                    <div class="step fragment fade-up">
+                        <div class="step-number">1</div>
+                        <h4>データベースとは</h4>
+                        <p>15分</p>
+                    </div>
+                    <div class="step fragment fade-up">
+                        <div class="step-number">2</div>
+                        <h4>RDBの基本</h4>
+                        <p>20分</p>
+                    </div>
+                    <div class="step fragment fade-up">
+                        <div class="step-number">3</div>
+                        <h4>正規化</h4>
+                        <p>25分</p>
+                    </div>
+                    <div class="step fragment fade-up">
+                        <div class="step-number">4</div>
+                        <h4>休憩</h4>
+                        <p>10分</p>
+                    </div>
+                </div>
+                
+                <div class="step-container">
+                    <div class="step fragment fade-up">
+                        <div class="step-number">5</div>
+                        <h4>DB種類</h4>
+                        <p>10分</p>
+                    </div>
+                    <div class="step fragment fade-up">
+                        <div class="step-number">6</div>
+                        <h4>SQL実習</h4>
+                        <p>35分</p>
+                    </div>
+                    <div class="step fragment fade-up">
+                        <div class="step-number">7</div>
+                        <h4>C++Builder</h4>
+                        <p>10分</p>
+                    </div>
+                    <div class="step fragment fade-up">
+                        <div class="step-number">8</div>
+                        <h4>まとめ・Q&A</h4>
+                        <p>15分</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- セクション1開始 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>第1部：データベースの基礎概念</h1>
+                    <p>データベース（Database）とは？<br>「データの基地」= 情報が整理された収納箱</p>
+                </div>
+            </section>
+
+            <!-- スライド4: データベースの定義 -->
+            <section>
+                <h2><span class="emoji">💾</span>データベースとは何か</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🏗️</span>ポイント</h3>
+                    <ul>
+                        <li>構造化されたデータを保存する仕組み</li>
+                        <li>一定のルールに基づいて整理</li>
+                        <li>必要な時に素早くデータを取り出せる</li>
+                        <li>大量のデータを効率的に管理</li>
+                    </ul>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">📚</span>比喩で理解</h3>
+                    <p>図書館のように、本（データ）が分類されて整理されている状態</p>
+                </div>
+            </section>
+
+            <!-- スライド5: データベースの利点 -->
+            <section>
+                <h2><span class="emoji">✨</span>なぜデータベースが必要？</h2>
+                
+                <div class="grid-2">
+                    <div class="success-box fragment fade-right">
+                        <h3><span class="card-icon">🔍</span>高速検索</h3>
+                        <p>必要な情報を瞬時に検索</p>
+                    </div>
+                    
+                    <div class="success-box fragment fade-right">
+                        <h3><span class="card-icon">🔒</span>データ整合性</h3>
+                        <p>重複や矛盾を防ぐ</p>
+                    </div>
+                    
+                    <div class="success-box fragment fade-right">
+                        <h3><span class="card-icon">👥</span>共有アクセス</h3>
+                        <p>複数人で同時利用</p>
+                    </div>
+                    
+                    <div class="success-box fragment fade-right">
+                        <h3><span class="card-icon">🛡️</span>セキュリティ</h3>
+                        <p>アクセス権限の管理</p>
+                    </div>
+                </div>
+                
+                <div class="success-box fragment fade-in" style="text-align: center; margin-top: 15px;">
+                    <h3><span class="card-icon">💾</span>バックアップ：データ保護</h3>
+                </div>
+            </section>
+
+            <!-- スライド6: 身近な活用例 -->
+            <section>
+                <h2><span class="emoji">🌍</span>データベースは身の回りにある</h2>
+                
+                <div class="grid-2">
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">🏢</span>顧客管理システム</h3>
+                        <p>→ 住所、氏名、購入履歴</p>
+                    </div>
+                    
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">📦</span>在庫管理システム</h3>
+                        <p>→ 商品情報、在庫数、店舗別管理</p>
+                    </div>
+                    
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">🏥</span>電子カルテ</h3>
+                        <p>→ 患者情報、診療記録、処方箋</p>
+                    </div>
+                    
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">👥</span>社員管理システム</h3>
+                        <p>→ 社員情報、部署、勤怠管理</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- セクション2開始 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>第2部：リレーショナルデータベース（RDB）</h1>
+                    <p>表形式でデータを管理する最も一般的なデータベース</p>
+                </div>
+            </section>
+
+            <!-- スライド8: RDBの基本構造 -->
+            <section>
+                <h2><span class="emoji">📊</span>リレーショナルデータベースの特徴</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🏗️</span>構成要素</h3>
+                    <ul>
+                        <li><strong>テーブル（表）</strong>：データを格納する表</li>
+                        <li><strong>レコード（行）</strong>：1つの情報セット</li>
+                        <li><strong>フィールド（列）</strong>：特定の属性</li>
+                    </ul>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>イメージ</h3>
+                    <p>Excelの表のような2次元構造 → 人間にとって理解しやすい</p>
+                </div>
+            </section>
+
+            <!-- スライド9: 主キーと外部キー -->
+            <section>
+                <h2><span class="emoji">🔑</span>テーブル間の関係を作る「キー」</h2>
+                
+                <div class="grid-2">
+                    <div class="card fragment fade-right">
+                        <h3><span class="card-icon">🏷️</span>主キー（Primary Key）</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>テーブル内でレコードを一意に識別</li>
+                            <li>重複不可、NULL不可</li>
+                            <li>例：社員ID、商品コード</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card fragment fade-left">
+                        <h3><span class="card-icon">🔗</span>外部キー（Foreign Key）</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>他のテーブルの主キーを参照</li>
+                            <li>テーブル間の関連を表現</li>
+                            <li>データの整合性を保証</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド10: テーブル設計の実例 -->
+            <section>
+                <h2><span class="emoji">👥</span>社員管理システムの例</h2>
+                
+                <div class="grid-2">
+                    <div class="fragment fade-right">
+                        <h4 style="text-align: center; color: var(--accent-color);">社員テーブル</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>社員ID</th><th>氏名</th><th>部署ID</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="improved-data">001</td><td>田中</td><td class="improved-data">D01</td></tr>
+                                <tr><td class="improved-data">002</td><td>佐藤</td><td class="improved-data">D02</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="fragment fade-left">
+                        <h4 style="text-align: center; color: var(--accent-color);">部署テーブル</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>部署ID</th><th>部署名</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="improved-data">D01</td><td>営業部</td></tr>
+                                <tr><td class="improved-data">D02</td><td>開発部</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="fragment fade-in text-center" style="margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: var(--accent-color);">
+                        部署IDで2つのテーブルがつながっている
+                    </p>
+                </div>
+            </section>
+
+            <!-- セクション3開始 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>第3部：データベースの正規化</h1>
+                    <p>データの重複を排除し、効率的な設計を実現</p>
+                </div>
+            </section>
+
+            <!-- スライド12: 正規化とは -->
+            <section>
+                <h2><span class="emoji">🧹</span>なぜ正規化が必要？</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🎯</span>目的</h3>
+                    <ul>
+                        <li>同じ情報を何度も書かない</li>
+                        <li>変更がラク（1か所直せばOK）</li>
+                        <li>食い違いを防ぐ（間違いが起きにくい）</li>
+                        <li>表がスッキリして探しやすい</li>
+                    </ul>
+                </div>
+                
+                <div class="step-container fragment fade-in">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h4>第1正規形</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h4>第2正規形</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h4>第3正規形</h4>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド13: 非正規化の問題 -->
+            <section>
+                <h2><span class="emoji">⚠️</span>正規化前のテーブル（問題例）</h2>
+                
+                <h4 style="text-align: center; color: var(--danger-color);">注文テーブル（非正規化）</h4>
+                <table class="data-table fragment slide-in-up">
+                    <thead>
+                        <tr><th>注文ID</th><th>顧客名</th><th>顧客住所</th><th>商品名</th><th>単価</th><th>数量</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>001</td>
+                            <td>田中</td>
+                            <td class="fragment highlight-current-red">東京都...</td>
+                            <td>ペン</td>
+                            <td class="fragment highlight-current-red">100</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>002</td>
+                            <td>田中</td>
+                            <td class="duplicate-data">東京都...</td>
+                            <td>ノート</td>
+                            <td>200</td>
+                            <td>3</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="warning-box fragment fade-in">
+                    <h3><span class="card-icon">⚠️</span>問題点</h3>
+                    <ul style="font-size: 0.8em;">
+                        <li>❌ 顧客情報の重複</li>
+                        <li>❌ 住所変更時の更新漏れリスク</li>
+                        <li>❌ 容量の無駄</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- スライド14: 第1正規形 -->
+            <section>
+                <h2><span class="emoji">1️⃣</span>第1正規形（1NF）</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">📏</span>ルール</h3>
+                    <p>1マスに1つだけの値（カンマで詰め込まない・繰り返し列を作らない）</p>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="fragment fade-right">
+                        <h4 style="color: var(--danger-color); text-align: center;">Before</h4>
+                        <table class="data-table">
+                            <thead><tr><th>社員ID</th><th>スキル</th></tr></thead>
+                            <tbody><tr><td>001</td><td style="background: rgba(231, 76, 60, 0.3);">Java,C++</td></tr></tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="fragment fade-left">
+                        <h4 style="color: var(--success-color); text-align: center;">After</h4>
+                        <table class="data-table">
+                            <thead><tr><th>社員ID</th><th>スキル</th></tr></thead>
+                            <tbody>
+                                <tr><td>001</td><td class="improved-data">Java</td></tr>
+                                <tr><td>001</td><td class="improved-data">C++</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド15: 第2正規形 -->
+            <section>
+                <h2><span class="emoji">2️⃣</span>第2正規形（2NF）</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🔗</span>ルール</h3>
+                    <ul style="font-size: 0.8em;">
+                        <li>第1正規形を満たす</li>
+                        <li>主キーの一部だけで決まる項目をなくす</li>
+                    </ul>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>考え方</h3>
+                    <p>「キーぜんぶ」で決まる情報だけを同じ表に置く</p>
+                </div>
+                
+                <div class="success-box fragment fade-in">
+                    <h3><span class="card-icon">✨</span>効果</h3>
+                    <p>ムダな繰り返しが減り、更新が楽になる</p>
+                </div>
+
+                <!-- 2NF 例: 部分依存の分離 -->
+                <div class="grid-2">
+                    <div class="fragment fade-right">
+                        <h4 style="color: var(--danger-color); text-align: center;">Before（非2NF：部分依存あり）</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>受注ID</th><th>商品ID</th><th>商品名</th><th>単価</th><th>数量</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>O01</td><td>P01</td><td>ペン</td><td>100</td><td>5</td></tr>
+                                <tr><td>O01</td><td>P02</td><td>ノート</td><td>200</td><td>2</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size: 0.6em; text-align:center; color:#e6eef8;">商品名・単価は<span style="color: var(--accent-color);">商品ID</span>だけで決まる（主キーの一部に依存）</p>
+                    </div>
+                    <div class="fragment fade-left">
+                        <h4 style="color: var(--success-color); text-align: center;">After（2NF：部分依存を分離）</h4>
+                        <table class="data-table" style="margin-bottom:8px;">
+                            <thead><tr><th>商品ID</th><th>商品名</th><th>単価</th></tr></thead>
+                            <tbody>
+                                <tr><td class="improved-data">P01</td><td>ペン</td><td>100</td></tr>
+                                <tr><td class="improved-data">P02</td><td>ノート</td><td>200</td></tr>
+                            </tbody>
+                        </table>
+                        <table class="data-table">
+                            <thead><tr><th>受注ID</th><th>商品ID</th><th>数量</th></tr></thead>
+                            <tbody>
+                                <tr><td>O01</td><td class="improved-data">P01</td><td>5</td></tr>
+                                <tr><td>O01</td><td class="improved-data">P02</td><td>2</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size: 0.6em; text-align:center; color:#e6eef8;">商品情報は「商品」表へ、明細は「受注明細」表へ</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド16: 第3正規形 -->
+            <section>
+                <h2><span class="emoji">3️⃣</span>第3正規形（3NF）</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🔗</span>ルール</h3>
+                    <ul style="font-size: 0.8em;">
+                        <li>第2正規形を満たす</li>
+                        <li>間接的な決まりごと（A→B→C）をなくす</li>
+                    </ul>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>考え方</h3>
+                    <p>キー以外どうしで決まる関係を断つ（例: 郵便番号→住所）</p>
+                </div>
+                
+                <div class="success-box fragment fade-in">
+                    <h3><span class="card-icon">🎯</span>実務</h3>
+                    <p>まずは3NFまでで実用十分（多くの現場でOK）</p>
+                </div>
+            </section>
+
+            <!-- スライド17: 正規化の完成例 -->
+            <section>
+                <h2><span class="emoji">✅</span>正規化完了後の設計</h2>
+                
+                <div class="grid-3">
+                    <div class="fragment zoom-in">
+                        <h4 style="text-align: center; color: var(--info-color); font-size: 0.7em;">顧客テーブル</h4>
+                        <table class="data-table">
+                            <thead><tr><th>顧客ID</th><th>顧客名</th><th>住所</th></tr></thead>
+                            <tbody><tr><td class="improved-data">C01</td><td>田中</td><td>東京都...</td></tr></tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="fragment zoom-in">
+                        <h4 style="text-align: center; color: var(--success-color); font-size: 0.7em;">商品テーブル</h4>
+                        <table class="data-table">
+                            <thead><tr><th>商品ID</th><th>商品名</th><th>単価</th></tr></thead>
+                            <tbody>
+                                <tr><td class="improved-data">P01</td><td>ペン</td><td>100</td></tr>
+                                <tr><td class="improved-data">P02</td><td>ノート</td><td>200</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="fragment zoom-in">
+                        <h4 style="text-align: center; color: var(--warning-color); font-size: 0.7em;">注文テーブル</h4>
+                        <table class="data-table">
+                            <thead><tr><th>注文ID</th><th>顧客ID</th><th>商品ID</th><th>数量</th></tr></thead>
+                            <tbody>
+                                <tr><td>001</td><td class="improved-data">C01</td><td class="improved-data">P01</td><td>5</td></tr>
+                                <tr><td>002</td><td class="improved-data">C01</td><td class="improved-data">P02</td><td>3</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 休憩 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>☕ 休憩時間</h1>
+                    <p>10分間の休憩<br>質問があればお気軽にどうぞ</p>
+                </div>
+            </section>
+
+            <!-- セクション4開始 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>第4部：データベースの種類と選択</h1>
+                    <p>用途に応じた最適なデータベース選択</p>
+                </div>
+            </section>
+
+            <!-- スライド20: 主要なRDBMS -->
+            <section>
+                <h2><span class="emoji">🗄️</span>リレーショナルデータベース管理システム</h2>
+                
+                <div class="grid-2">
+                    <div class="card fragment fade-right">
+                        <h3><span class="card-icon">🆓</span>オープンソース</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>🐬 <strong>MySQL</strong>：Web開発で人気</li>
+                            <li>🐘 <strong>PostgreSQL</strong>：高機能、エンタープライズ</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card fragment fade-left">
+                        <h3><span class="card-icon">💰</span>商用製品</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>🔷 <strong>Microsoft SQL Server</strong>：Windows環境</li>
+                            <li>🔶 <strong>Oracle Database</strong>：大企業向け</li>
+                            <li>📊 <strong>Microsoft ACCESS</strong>：小規模・デスクトップ</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド21: NoSQLデータベース -->
+            <section>
+                <h2><span class="emoji">🔄</span>従来のSQL以外のデータベース</h2>
+                
+                <div class="grid-2">
+                    <div class="card fragment fade-right">
+                        <h3><span class="card-icon">📊</span>種類</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>📄 <strong>ドキュメント型</strong>：MongoDB</li>
+                            <li>🗂️ <strong>キー・バリュー型</strong>：Redis</li>
+                            <li>📊 <strong>カラム型</strong>：Cassandra</li>
+                            <li>🕸️ <strong>グラフ型</strong>：Neo4j</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card fragment fade-left">
+                        <h3><span class="card-icon">🚀</span>用途</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>ビッグデータ</li>
+                            <li>リアルタイム処理</li>
+                            <li>柔軟なスキーマ</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド22: データベース選択基準 -->
+            <section>
+                <h2><span class="emoji">🎯</span>用途別データベース選択</h2>
+                
+                <div class="grid-2">
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">🏠</span>小規模・個人用</h3>
+                        <p>→ ACCESS、SQLite</p>
+                    </div>
+                    
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">🌐</span>Web開発</h3>
+                        <p>→ MySQL、PostgreSQL</p>
+                    </div>
+                    
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">🏢</span>企業システム</h3>
+                        <p>→ SQL Server、Oracle</p>
+                    </div>
+                    
+                    <div class="card fragment zoom-in">
+                        <h3><span class="card-icon">📊</span>ビッグデータ</h3>
+                        <p>→ NoSQL系（MongoDB等）</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- セクション5開始 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>第5部：SQL実習とハンズオン</h1>
+                    <p>実際にACCESSでSQLを書いて実行してみよう！</p>
+                </div>
+            </section>
+
+            <!-- スライド24: 実習用データベース -->
+            <section>
+                <h2><span class="emoji">🗃️</span>今日使うサンプルデータベース</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🏪</span>商品管理システム</h3>
+                    <ul style="font-size: 0.8em;">
+                        <li>商品テーブル</li>
+                        <li>顧客テーブル</li>
+                        <li>注文テーブル</li>
+                    </ul>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">📝</span>データ例</h3>
+                    <p><strong>商品</strong>：ボールペン、ノート、消しゴム<br>
+                    <strong>顧客</strong>：田中さん、佐藤さん、山田さん</p>
+                </div>
+            </section>
+
+            <!-- スライド25: SELECT文の基礎 -->
+            <section>
+                <h2><span class="emoji">🔍</span>データを取得する - SELECT文</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">📋</span>基本構文</h3>
+                    <div class="sql-demo">
+                        <code><span class="sql-keyword">SELECT</span> フィールド名 <span class="sql-keyword">FROM</span> テーブル名;</code>
+                    </div>
+                </div>
+                
+                <div class="grid-3">
+                    <div class="card fragment fade-up">
+                        <h4>例1: 全データ取得</h4>
+                        <div class="sql-demo">
+                            <code><span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> 商品;</code>
+                        </div>
+                    </div>
+                    
+                    <div class="card fragment fade-up">
+                        <h4>例2: 特定フィールド</h4>
+                        <div class="sql-demo">
+                            <code><span class="sql-keyword">SELECT</span> 商品名, 価格<br><span class="sql-keyword">FROM</span> 商品;</code>
+                        </div>
+                    </div>
+                    
+                    <div class="card fragment fade-up">
+                        <h4>例3: 条件付き検索</h4>
+                        <div class="sql-demo">
+                            <code><span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> 商品<br><span class="sql-keyword">WHERE</span> 価格 > 500;</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド26: INSERT文 -->
+            <section>
+                <h2><span class="emoji">➕</span>データを追加する - INSERT文</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">📝</span>構文</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">INSERT INTO</span> テーブル名 (フィールド1, フィールド2)<br>
+                            <span class="sql-keyword">VALUES</span> (値1, 値2);
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>例</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">INSERT INTO</span> 商品 (商品名, 価格, 在庫数)<br>
+                            <span class="sql-keyword">VALUES</span> (<span class="sql-string">'シャープペン'</span>, 300, 50);
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="success-box fragment fade-in">
+                    <h3><span class="card-icon">🎯</span>実習</h3>
+                    <p>新しい商品を5つ追加してみましょう！</p>
+                </div>
+            </section>
+
+            <!-- スライド27: UPDATE文 -->
+            <section>
+                <h2><span class="emoji">✏️</span>データを更新する - UPDATE文</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">📝</span>構文</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">UPDATE</span> テーブル名<br>
+                            <span class="sql-keyword">SET</span> フィールド名 = 新しい値<br>
+                            <span class="sql-keyword">WHERE</span> 条件;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>例</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">UPDATE</span> 商品<br>
+                            <span class="sql-keyword">SET</span> 価格 = 350<br>
+                            <span class="sql-keyword">WHERE</span> 商品名 = <span class="sql-string">'シャープペン'</span>;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="warning-box fragment fade-in">
+                    <h3><span class="card-icon">⚠️</span>注意</h3>
+                    <p>WHERE句を忘れると全データが更新される！</p>
+                </div>
+            </section>
+
+            <!-- スライド28: DELETE文 -->
+            <section>
+                <h2><span class="emoji">🗑️</span>データを削除する - DELETE文</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">📝</span>構文</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">DELETE FROM</span> テーブル名<br>
+                            <span class="sql-keyword">WHERE</span> 条件;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>例</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">DELETE FROM</span> 商品<br>
+                            <span class="sql-keyword">WHERE</span> 在庫数 = 0;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="warning-box fragment fade-in">
+                    <h3><span class="card-icon">🚨</span>重要</h3>
+                    <p>WHERE句なしは全削除！十分注意して実行</p>
+                </div>
+            </section>
+
+            <!-- スライド29: JOIN文 -->
+            <section>
+                <h2><span class="emoji">🔗</span>複数テーブルを結合 - JOIN文</h2>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">📝</span>構文</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> テーブル1<br>
+                            <span class="sql-keyword">INNER JOIN</span> テーブル2<br>
+                            <span class="sql-keyword">ON</span> テーブル1.キー = テーブル2.キー;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">💡</span>例</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">SELECT</span> 顧客.顧客名, 注文.商品ID<br>
+                            <span class="sql-keyword">FROM</span> 顧客<br>
+                            <span class="sql-keyword">INNER JOIN</span> 注文<br>
+                            <span class="sql-keyword">ON</span> 顧客.顧客ID = 注文.顧客ID;
+                        </code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド30: 実習タイム -->
+            <section>
+                <h2><span class="emoji">🎯</span>ハンズオン実習（20分）</h2>
+                
+                <div class="grid-2">
+                    <div class="success-box fragment fade-right">
+                        <h3><span class="card-icon">📋</span>課題1-3</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>課題1: 商品テーブルに5つの新商品を追加</li>
+                            <li>課題2: 価格が500円以上の商品を検索</li>
+                            <li>課題3: 特定商品の在庫数を更新</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="success-box fragment fade-left">
+                        <h3><span class="card-icon">📋</span>課題4-5</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>課題4: 売り切れ商品を削除</li>
+                            <li>課題5: 顧客と注文を結合して表示</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="highlight-box fragment fade-in text-center">
+                    <h3><span class="card-icon">🙋</span>サポート</h3>
+                    <p>困ったら手を挙げて質問してください！</p>
+                </div>
+            </section>
+
+            <!-- セクション6開始 -->
+            <section class="title-slide" data-background-color="#eef2f6">
+                <div class="section-header">
+                    <h1>第6部：C++Builder12からACCESS連携</h1>
+                    <p>プログラムからデータベースを操作する方法</p>
+                </div>
+            </section>
+
+            <!-- スライド32: ADO接続の設定 -->
+            <section>
+                <h2><span class="emoji">🔌</span>データベースへの接続</h2>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">🔗</span>接続文字列</h3>
+                    <div class="sql-demo">
+                        <code>
+                            String connectionString =<br>
+                            &nbsp;&nbsp;<span class="sql-string">"Provider=Microsoft.ACE.OLEDB.12.0;"</span><br>
+                            &nbsp;&nbsp;<span class="sql-string">"Data Source=C:\\database\\sample.accdb;"</span>;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">⚡</span>接続処理</h3>
+                    <div class="sql-demo">
+                        <code>
+                            ADOConnection1->ConnectionString = connectionString;<br>
+                            ADOConnection1->Connected = true;
+                        </code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド33: データ読み取り例 -->
+            <section>
+                <h2><span class="emoji">📖</span>C++Builderでデータを取得</h2>
+                
+                <div class="sql-demo fragment fade-in">
+                    <code>
+                        <span class="sql-comment">// SQL実行</span><br>
+                        ADOQuery1->SQL->Clear();<br>
+                        ADOQuery1->SQL->Add(<span class="sql-string">"SELECT * FROM 商品 WHERE 価格 > 1000"</span>);<br>
+                        ADOQuery1->Open();<br><br>
+                        
+                        <span class="sql-comment">// 結果処理</span><br>
+                        <span class="sql-keyword">while</span> (!ADOQuery1->Eof) {<br>
+                        &nbsp;&nbsp;String 商品名 = ADOQuery1->FieldByName(<span class="sql-string">"商品名"</span>)->AsString;<br>
+                        &nbsp;&nbsp;<span class="sql-keyword">int</span> 価格 = ADOQuery1->FieldByName(<span class="sql-string">"価格"</span>)->AsInteger;<br>
+                        &nbsp;&nbsp;ADOQuery1->Next();<br>
+                        }
+                    </code>
+                </div>
+            </section>
+
+            <!-- スライド34: データ書き込み例 -->
+            <section>
+                <h2><span class="emoji">✍️</span>C++Builderでデータを追加</h2>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">📝</span>パラメータ化クエリ</h3>
+                    <div class="sql-demo">
+                        <code>
+                            ADOQuery1->SQL->Clear();<br>
+                            ADOQuery1->SQL->Add(<br>
+                            &nbsp;&nbsp;<span class="sql-string">"INSERT INTO 商品 (商品名, 価格, 在庫数) "</span><br>
+                            &nbsp;&nbsp;<span class="sql-string">"VALUES (:name, :price, :stock)"</span><br>
+                            );<br>
+                            ADOQuery1->Parameters->ParamByName(<span class="sql-string">"name"</span>)->Value = <span class="sql-string">"新商品"</span>;<br>
+                            ADOQuery1->Parameters->ParamByName(<span class="sql-string">"price"</span>)->Value = 500;<br>
+                            ADOQuery1->Parameters->ParamByName(<span class="sql-string">"stock"</span>)->Value = 50;<br>
+                            ADOQuery1->ExecSQL();
+                        </code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド35: エラーハンドリング -->
+            <section>
+                <h2><span class="emoji">🛡️</span>安全なデータベース操作</h2>
+                
+                <div class="card fragment fade-in">
+                    <h3><span class="card-icon">🔒</span>try-catch文の使用</h3>
+                    <div class="sql-demo">
+                        <code>
+                            <span class="sql-keyword">try</span> {<br>
+                            &nbsp;&nbsp;ADOConnection1->Connected = true;<br>
+                            &nbsp;&nbsp;<span class="sql-comment">// データベース操作</span><br>
+                            &nbsp;&nbsp;ADOQuery1->ExecSQL();<br>
+                            }<br>
+                            <span class="sql-keyword">catch</span> (Exception &e) {<br>
+                            &nbsp;&nbsp;ShowMessage(<span class="sql-string">"エラー: "</span> + e.Message);<br>
+                            }
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="warning-box fragment fade-in">
+                    <h3><span class="card-icon">⚠️</span>重要ポイント</h3>
+                    <p>必ずエラー処理を実装する</p>
+                </div>
+            </section>
+
+            <!-- スライド36: まとめ -->
+            <section>
+                <h2><span class="emoji">📚</span>本日学んだこと</h2>
+                
+                <div class="grid-2">
+                    <div class="success-box fragment fade-right">
+                        <h3><span class="card-icon">📖</span>理論編</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>✓ データベースの基本概念</li>
+                            <li>✓ リレーショナルデータベース</li>
+                            <li>✓ 正規化（第1～第3正規形）</li>
+                            <li>✓ データベースの種類と選択</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="success-box fragment fade-left">
+                        <h3><span class="card-icon">💻</span>実践編</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>✓ 基本SQL（SELECT, INSERT, UPDATE, DELETE）</li>
+                            <li>✓ JOIN文での複数テーブル操作</li>
+                            <li>✓ C++Builderからの接続と操作</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド37: 今後の学習ステップ -->
+            <section>
+                <h2><span class="emoji">🚀</span>さらなるスキルアップのために</h2>
+                
+                <div class="grid-2">
+                    <div class="card fragment fade-right">
+                        <h3><span class="card-icon">📈</span>次のステップ</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>1. より複雑なSQL文の習得</li>
+                            <li>2. データベース設計の実践</li>
+                            <li>3. パフォーマンス最適化</li>
+                            <li>4. セキュリティ対策</li>
+                            <li>5. 他のデータベースシステムへの展開</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card fragment fade-left">
+                        <h3><span class="card-icon">📚</span>推奨資料</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li>• SQL実践ガイド</li>
+                            <li>• データベース設計パターン集</li>
+                            <li>• C++Builder公式ドキュメント</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- スライド38: 質疑応答 -->
+            <section>
+                <h1 class="text-center"><span class="emoji">💬</span>質疑応答タイム</h1>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">🙋</span>ご質問をお聞かせください</h3>
+                    <ul style="font-size: 0.9em;">
+                        <li>• 今日の内容に関する質問</li>
+                        <li>• 実務での疑問</li>
+                        <li>• 今後の学習について</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center fragment fade-in" style="margin-top: 25px;">
+                    <p style="font-size: 1.2em; color: var(--accent-color);">
+                        <strong>時間：10分間</strong>
+                    </p>
+                </div>
+            </section>
+
+            <!-- スライド39: 終了 -->
+            <section class="title-slide" data-background-color="#ffffff">
+                <h1><span class="emoji">🎉</span>講座終了</h1>
+                <p class="subtitle">お疲れさまでした！<br>データベースの世界への第一歩を踏み出しましたね</p>
+                
+                <div class="highlight-box fragment fade-in">
+                    <h3><span class="card-icon">✨</span>今後も</h3>
+                    <ul>
+                        <li>✨ 継続的な学習で成長していきましょう</li>
+                        <li>💪 実際のプロジェクトで経験を積んでください</li>
+                        <li>🤝 困ったときはいつでも相談してください</li>
+                    </ul>
+                </div>
+                
+                <div class="fragment fade-in text-center" style="margin-top: 20px;">
+                    <button class="interactive-btn hover-scale" onclick="alert('講座へのご参加ありがとうございました！🎉')">
+                        📧 連絡先情報
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/markdown/markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/highlight.js"></script>
+
+    <script>
+        Reveal.initialize({
+            hash: true,
+            transition: 'slide',
+            transitionSpeed: 'default',
+            backgroundTransition: 'fade',
+            
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+            
+            controls: true,
+            progress: true,
+            center: true,
+            touch: true,
+            loop: false,
+            fragments: true,
+            help: true,
+            showNotes: false,
+            autoSlide: 0,
+            mouseWheel: false,
+            previewLinks: false,
+            
+            width: "100%",
+            height: "100%",
+            margin: 0,
+            minScale: 0.2,
+            maxScale: 2.0
+        });
+
+        // キーボードショートカット
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.code === 'KeyH') {
+                alert('🎯 操作方法\n\n→ 次: スペース/右矢印\n← 前: 左矢印\nESC: 一覧\nF: フルスクリーン');
+            }
+        });
+
+        // インタラクティブ機能
+        function showSQLResult() {
+            alert('✨ SQL実行完了！\n\n商品一覧が表示されました。');
+        }
+    </script>
+</body>
+</html>
